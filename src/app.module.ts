@@ -1,19 +1,25 @@
-import 'winston-daily-rotate-file';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServerConfig } from './configs/envs/default';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { WinstonModule } from 'nest-winston';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import { HttpModule } from '@nestjs/axios';
+import 'winston-daily-rotate-file';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    HttpModule.registerAsync({
+      useFactory: () => ({
+        timeout: 5000,
+      }),
     }),
     TypeOrmModule.forRoot({
       type: ServerConfig.db.type as any,
@@ -32,26 +38,51 @@ import * as winston from 'winston';
     WinstonModule.forRoot({
       transports: [
         new winston.transports.DailyRotateFile({
-          filename: 'logs/debug-%DATE%.log',
+          level: 'debug',
+          filename: 'debug-%DATE%.log',
+          dirname: 'logs',
           datePattern: 'YYYY-MM-DD',
           zippedArchive: true,
           maxSize: '20m',
           maxFiles: '14d',
-          level: 'debug',
           format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.json(),
+            winston.format.errors({ stack: true }),
+            winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+            winston.format.printf((info) => {
+              return `${[info.timestamp]}|${
+                info.message
+              }|${info.level.toUpperCase()} STACK:\n${info.stack}`;
+            }),
           ),
         }),
         new winston.transports.DailyRotateFile({
-          filename: 'logs/error-%DATE%.log',
+          level: 'error',
+          filename: 'error-%DATE%.log',
+          dirname: 'logs',
           datePattern: 'YYYY-MM-DD',
           zippedArchive: true,
           maxSize: '20m',
           maxFiles: '14d',
-          level: 'error',
+          format: winston.format.combine(
+            winston.format.errors({ stack: true }),
+            winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+            winston.format.printf((info) => {
+              return `${[info.timestamp]}|${
+                info.message
+              }|${info.level.toUpperCase()} STACK:\n${info.stack}`;
+            }),
+          ),
         }),
       ],
+      format: winston.format.combine(
+        winston.format.errors({ stack: true }),
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.printf((info) => {
+          return `${[info.timestamp]}|${
+            info.message
+          }|${info.level.toUpperCase()} STACK:\n${info.stack}`;
+        }),
+      ),
     }),
     AuthModule,
     UsersModule,

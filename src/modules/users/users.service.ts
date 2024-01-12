@@ -1,8 +1,9 @@
-import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { UsersRepository } from './user.repository';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { ErrorUtils } from 'src/utils/error.utils';
 import { Constants } from 'src/utils/constant.utils';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Injectable()
 export class UsersService {
@@ -38,6 +39,7 @@ export class UsersService {
 
   async findAll() {
     const data = await this.repository.readManyEntities({});
+    this.logger.info(data);
     if (data instanceof Error) {
       this.logger.error(data);
       ErrorUtils.throwHttpError();

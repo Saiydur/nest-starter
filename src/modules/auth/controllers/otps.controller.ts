@@ -20,7 +20,7 @@ export class OtpsController {
 
   @Get()
   testOtp() {
-    return {};
+    return this.otpsService.test();
   }
 
   @Post('send')

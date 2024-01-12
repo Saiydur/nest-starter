@@ -57,6 +57,11 @@ export class OtpsService {
     return data;
   }
 
+  async test() {
+    this.logger.info('test');
+    return 'test';
+  }
+
   async create(dto: OtpSendDto) {
     const { msisdn } = dto;
     const data = await this.generateSendOtp(msisdn);

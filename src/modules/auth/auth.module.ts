@@ -12,6 +12,7 @@ import { OtpsRepository } from './otps.repository';
 import JwtClient from 'src/core/jwt/jwt.client';
 import { HttpClient } from 'src/core/client/http.client';
 import { UsersService } from '../users/users.service';
+import { OtpsController } from './controllers/otps.controller';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { UsersService } from '../users/users.service';
     }),
     HttpModule,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, OtpsController],
   providers: [AuthService, OtpsService, OtpsRepository, JwtClient, HttpClient],
 })
 export class AuthModule {}
